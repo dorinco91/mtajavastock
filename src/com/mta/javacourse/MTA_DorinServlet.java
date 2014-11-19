@@ -8,7 +8,10 @@ public class MTA_DorinServlet extends HttpServlet {
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
 		
-		//exercise 2 11/11/14
+		//exercise1
+		resp.getWriter().println("<h1>hello , my world</h1>");
+		
+		//exercise 2
 		int num1=4;
 		int num2=3;
 		int num3=7;
