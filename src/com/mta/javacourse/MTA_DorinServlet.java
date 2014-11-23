@@ -8,6 +8,7 @@ public class MTA_DorinServlet extends HttpServlet {
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
 		
+		resp.setContentType("text/html");
 		//exercise1: hello
 		resp.getWriter().println("<h1>hello , my world</h1>");
 		
@@ -17,7 +18,7 @@ public class MTA_DorinServlet extends HttpServlet {
 		int num3=7;
 		int result= (num1+num2)*num3;
 		String ex2Str= new String ("<h1>Result of "+"("+num1+"+"+num2+")"+"*"+num3+" = "+result+ "</h1>");
-		resp.setContentType("text/html");
+		
 	
 		//exercise 3: 18/11/14
 		double Radios=50; 
