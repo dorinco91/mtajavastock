@@ -8,21 +8,63 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.mta.javacourse.service.PortfolioService;
 import com.mta.javacourse.model.Portfolio;
-import	com.mta.javacourse.Stock;
+import com.mta.javacourse.model.Stock;
 
+/**
+ * PortfolioServlet print to screen portfolio data 
+ * @author dorin cohen
+ * date December 2014
+ */
 public class PortfolioServlet  extends HttpServlet {
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
 		
-		resp.setContentType("text/html");
-		
 		PortfolioService portfolioService = new PortfolioService();
 		Portfolio portfolio = portfolioService.getPortfolio();
 		Stock[] stocks = portfolio.getStocks();
+		portfolio.setTitle("portfolio #1");
 		
-		portfolio.setTitle("FirstPortfolio");
+		//create portfolio # 2 that is a copy of portfolio #1 
+		Portfolio portfolio2=new Portfolio(portfolio);
+		portfolio2.setTitle("portfolio #2");
+		
+		
+		//print portfolios 
+		resp.setContentType("text/html");
 		String portfolioStr=portfolio.getHtmlString();
 		resp.getWriter().println(portfolioStr);
+		String portfolio2Str=portfolio2.getHtmlString();
+		resp.getWriter().println(portfolio2Str);
+		
+		
+		//remove first stock from portfolio1
+		portfolio.removeFirstStock(portfolio.getStocks());
+		
+		//print portfolios after remove 
+		portfolioStr=portfolio.getHtmlString();
+		resp.getWriter().println(portfolioStr);
+		portfolio2Str=portfolio2.getHtmlString();
+		resp.getWriter().println(portfolio2Str);
+		
+		
+		//change last stock's bid value of portfolio2 to 55.55
+		portfolio2.getStocks()[2].setBid(55.55f);
+		
+		//print portfolios after change bid
+		
+		resp.setContentType("text/html");
+		portfolioStr=portfolio.getHtmlString();
+		resp.getWriter().println(portfolioStr);
+		portfolio2Str=portfolio2.getHtmlString();
+		resp.getWriter().println(portfolio2Str);
+		
+		
+		
+	
+		
+		
+		
+		
 		
 	}
 
