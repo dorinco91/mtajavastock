@@ -43,7 +43,6 @@ public class PortfolioServlet  extends HttpServlet {
 		//print portfolios after remove 
 		portfolioStr=portfolio.getHtmlString();
 		resp.getWriter().println(portfolioStr);
-		portfolio2Str=portfolio2.getHtmlString();
 		resp.getWriter().println(portfolio2Str);
 		
 		
@@ -53,7 +52,6 @@ public class PortfolioServlet  extends HttpServlet {
 		//print portfolios after change bid
 		
 		resp.setContentType("text/html");
-		portfolioStr=portfolio.getHtmlString();
 		resp.getWriter().println(portfolioStr);
 		portfolio2Str=portfolio2.getHtmlString();
 		resp.getWriter().println(portfolio2Str);
