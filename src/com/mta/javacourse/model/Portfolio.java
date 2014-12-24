@@ -11,26 +11,30 @@ import java.util.Date;
 public class Portfolio {
 
 	private final static int MAX_PORTFOLIO_SIZE=5;
-	String title;
+	private enum ALGO_RECOMMENDATION {DO_NOTHING,BUY,SELL};
+	private int portfolioSize;
+	private String title;
+	private float balance;
 	private Stock[] stocks;
 	private StockStatus[] stockStatus;
-	int portfolioSize=0;
+
 
 	//constructors 
-/**
- *  portfolio constructor
- */
+	/**
+	 *  portfolio constructor
+	 */
 	public Portfolio()
 	{
+		balance=0;
 		portfolioSize=0;
+		this.setTitle("portfolio");
 		stockStatus=new StockStatus[MAX_PORTFOLIO_SIZE];
 		stocks=new Stock[MAX_PORTFOLIO_SIZE];
 	}
 
 
 	/**
-	 * copy constructor 
-	 * receives instance and copies it
+	 * copy constructor Portfolio
 	 * @param portfolio
 	 */
 	public Portfolio(Portfolio portfolio)
@@ -39,6 +43,7 @@ public class Portfolio {
 		this();
 		setTitle(portfolio.getTitle());
 		setPortfolioSize(portfolio.getPotfilioSize());		
+
 		for (int i = 0; i < portfolioSize; i++) {
 			stocks[i] = new Stock(portfolio.getStocks()[i]);
 		}
@@ -67,6 +72,10 @@ public class Portfolio {
 	{
 		stockStatus=stockStatus1;
 	}
+	public void setBalance(float balance)
+	{
+		this.balance=balance;
+	}
 
 	//getters 
 	public int getPotfilioSize()
@@ -86,6 +95,11 @@ public class Portfolio {
 		return title;
 	}
 
+	public float getBalance()
+	{
+		return balance;
+	}
+
 	//methods/
 	/**
 	 * addStock method
@@ -94,25 +108,109 @@ public class Portfolio {
 	 */
 	public void addStock(Stock s)
 	{
-		if (portfolioSize < MAX_PORTFOLIO_SIZE)
+		if (portfolioSize < stocks.length)
 		{
 			stocks[portfolioSize] = s;
-			stockStatus[portfolioSize] = new StockStatus();
+			stockStatus[portfolioSize] = new StockStatus(s);
 			portfolioSize++;
 		}
+		else 
+			System.out.println("Can't add new stock,portfolio can have only "+MAX_PORTFOLIO_SIZE +" stocks");
+	}
+	
+
+	/**
+	 * update the balance after sell/buy
+	 * @param amount
+	 */
+
+	public void updateBalance(float amount)
+	{
+		balance+=amount;
 	}
 
 	/**
-	 * a method that removes the first stock of the portfolio
-	 * @param stocks
+	 * removes stock from portfolio array
+	 * @param symbol
+	 * @return
 	 */
-	public void removeFirstStock(Stock[] stocks)
+	public boolean removeStock(String symbol)
 	{
-		this.portfolioSize--;
-		for(int i = 0; i < this.portfolioSize; i++)
-			this.stocks[i] = this.stocks[i+1];
+		sellStock(symbol,-1);
+		for (int i=0;i<stocks.length;i++)
+		{
+			if (symbol.equals(stocks[i].getSymbol()))
+			{
+				stocks[i]=stocks[portfolioSize-1];
+				stocks[portfolioSize-1]=null;
+				stockStatus[i]=stockStatus[portfolioSize-1];
+				stockStatus[portfolioSize-1]=null;
+				portfolioSize--;
+				return true;
+			}
+
+		}
+		return false;
 	}
 
+
+
+	/**
+	 * sell stocks and update the balance
+	 * @param symbol
+	 * @param quantity
+	 * @return
+	 */
+	public boolean sellStock(String symbol, int quantity )
+	{
+
+		for(int i=0; i<stocks.length; i++)
+			if(symbol.equals(stocks[i].getSymbol()))
+			{
+				if(quantity == -1) {
+					float amount1=stockStatus[i].getStockQuantity()*stockStatus[i].getCurrentBid();
+					updateBalance(amount1);
+					stockStatus[i].setStockQuantity(0);
+				}
+				else if(stockStatus[i].getStockQuantity()-quantity < 0){
+						System.out.println("Not enough stocks to sell");
+				}
+				else if (stockStatus[i].getStockQuantity()-quantity >= 0){
+					stockStatus[i].setStockQuantity(stockStatus[i].getStockQuantity()-quantity);
+					float amount = quantity*stockStatus[i].getCurrentBid();
+					updateBalance(amount);
+				}
+				return true;
+			}
+		return false;
+	}
+
+	/**
+	 * buy stocks and update the balance
+	 * @param symbol
+	 * @param quantity
+	 * @return
+	 */
+	public boolean buyStock(String symbol, int quantity )
+	{
+
+		for(int i=0; i<stocks.length;i++)
+			if(symbol.equals(stocks[i].getSymbol()))
+			{
+				if( quantity == -1) {
+					stockStatus[i].setStockQuantity(stockStatus[i].getStockQuantity()+ (int)(balance/stockStatus[i].getCurrentAsk()));
+					float spent = ((int)(balance/stockStatus[i].getCurrentAsk()) *stockStatus[i].getCurrentAsk())/(-1); //how much bought
+					updateBalance(spent);
+				}
+				else{
+					stockStatus[i].setStockQuantity(stockStatus[i].getStockQuantity()+quantity);
+					float spent1=(quantity*stockStatus[i].getCurrentAsk())/(-1);
+					updateBalance(spent1);
+				}
+				return true;
+			}
+		return false;
+	}
 	/**
 	 * method 
 	 * @returns  HTML string description in bold font and break between lines 
@@ -120,17 +218,40 @@ public class Portfolio {
 	 */
 	public String getHtmlString() 
 	{
-
 		String stockStr = "<h1>" + getTitle() + "</h1>" + "<br/>";
-
+		
+		stockStr+="<b> Total Protfolio Value: </b>"+ getTotalValue()+"$ <b> Total Stocks Value: </b>"+ getStocksValue()+ "$ <b> Balance </b>"+getBalance()+ "$ </br>";
 		for (int i = 0; i < portfolioSize;i++ )
 		{
 			stockStr += stocks[i].getHtmlDescription()+"<br>";
-
 		}
-
+		
 		return stockStr;
 	}
+
+	/**
+	 * calculate value of stocks
+	 * @return
+	 */
+	public float getStocksValue()
+	{
+		float sum=0;
+		for (int i=0;i<portfolioSize;i++)
+			sum+=stockStatus[i].getStockQuantity() * stockStatus[i].getCurrentBid();	
+		
+		return sum;
+	}
+
+	/**
+	 * returns total value (balance +stocks value)
+	 * @return
+	 */
+	public float getTotalValue()
+	{
+		return getBalance()+getStocksValue();
+	}
+
+
 	//inner class stockStatus
 	/**
 	 * inner class in Portfolio an instance represent StockStatus
@@ -138,20 +259,25 @@ public class Portfolio {
 	 * @date December 2014
 	 */
 	public class StockStatus {
-		private final static int DO_NOTHING = 0;
-		private final static int BUY = 1;
-		private final static int SELL = 2;	
+
 
 		private String symbol;
 		private float currentBid,currentAsk;
 		private Date date;
-		private int recommendation;
+		private ALGO_RECOMMENDATION recommendation;
 		private int stockQuantity;
 
 		/**
 		 * stockStatus constructor
 		 */
-		public StockStatus() {}
+		public StockStatus() {
+			symbol="None";
+			currentAsk=0;
+			currentBid=0;
+			date=new Date();
+			recommendation= ALGO_RECOMMENDATION.DO_NOTHING;
+			stockQuantity=0;
+		}
 
 		/**
 		 * copy constructor 
@@ -167,6 +293,22 @@ public class Portfolio {
 			setDate(stockstatus.getDate());
 			setRecommendation(stockstatus.getRecommendation());
 			setStockQuantity(stockstatus.getStockQuantity());
+		}
+
+		/**
+		 * Copy constructor of StockStatus with stock values  
+		 * @param stock
+		 */
+
+		public StockStatus(Stock stock)
+		{
+			this();
+			setSymbol(stock.getSymbol());
+			setCurrentBid(stock.getBid());
+			setCurrentAsk(stock.getAsk());
+			setDate(stock.getDate());
+			setRecommendation(ALGO_RECOMMENDATION.DO_NOTHING);
+			setStockQuantity(0);
 		}
 
 		//getters
@@ -186,7 +328,7 @@ public class Portfolio {
 		{
 			return date;
 		}
-		public int getRecommendation()
+		public ALGO_RECOMMENDATION getRecommendation() 
 		{
 			return recommendation;
 		}
@@ -212,7 +354,7 @@ public class Portfolio {
 		{
 			this.date=date;
 		}
-		public void setRecommendation(int recommendation)
+		public void setRecommendation(ALGO_RECOMMENDATION recommendation)
 		{
 			this.recommendation=recommendation;
 		}
