@@ -8,10 +8,10 @@ import java.util.Date;
  * @date December 2014
  */
 public class Stock {
-	private String symbol;
-	private float ask;
-	private float Bid;
-	private Date date;
+	protected String symbol;
+	protected float ask;
+	protected float Bid;
+	protected  Date date;
 
 	/**
 	 * constructor Stock- sets instance stock
@@ -20,6 +20,14 @@ public class Stock {
 	 * @param bid
 	 * @param date
 	 */
+	public Stock(){
+		
+		setSymbol("null");
+		setAsk(0);
+		setBid(0);
+		date=new Date();
+	};
+	
 	public Stock(String symbol,float ask,float bid,Date date)
 	{
 		this.setSymbol(symbol);
