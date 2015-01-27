@@ -1,6 +1,13 @@
 package com.mta.javacourse.model;
 
+
 import java.util.Date;
+
+import com.mta.javacourse.exception.BalanceException;
+import com.mta.javacourse.exception.NotEnoughStocksToSellException;
+import com.mta.javacourse.exception.PortfolioFullException;
+import com.mta.javacourse.exception.StockAlreadyExistsException;
+import com.mta.javacourse.exception.StockNotExistException;
 
 /**
  * class represent Portfolio
@@ -96,8 +103,15 @@ public class Portfolio {
 	 * @param stock s 
 	 * insert new stock to stocks array and change portfolioSize 
 	 */
-	public void addStock(Stock s)
+	public void addStock(Stock s) throws StockAlreadyExistsException, PortfolioFullException
 	{
+		for (int i=0; i<portfolioSize; i++)
+		{
+			if (this.stockStatus[i].getSymbol().equals(s.getSymbol()))
+					{
+						throw new StockAlreadyExistsException(s.getSymbol());
+					}
+		}
 		if (portfolioSize < stockStatus.length)
 		{
 			
@@ -105,7 +119,7 @@ public class Portfolio {
 			portfolioSize++;
 		}
 		else 
-			System.out.println("Can't add new stock,portfolio can have only "+MAX_PORTFOLIO_SIZE +" stocks");
+			throw new PortfolioFullException();
 	}
 	
 
@@ -122,9 +136,8 @@ public class Portfolio {
 	/**
 	 * removes stock from portfolio array
 	 * @param symbol
-	 * @return
 	 */
-	public boolean removeStock(String symbol)
+	public void removeStock(String symbol) throws StockNotExistException,NotEnoughStocksToSellException
 	{
 		sellStock(symbol,-1);
 		for (int i=0;i<stockStatus.length;i++)
@@ -134,22 +147,22 @@ public class Portfolio {
 				stockStatus[i]=stockStatus[portfolioSize-1];
 				stockStatus[portfolioSize-1]=null;
 				portfolioSize--;
-				return true;
+				
 			}
+			else 
+				throw new StockNotExistException(symbol);
 
 		}
-		return false;
+		
 	}
-
-
-
+	
+	
 	/**
 	 * sell stocks and update the balance
 	 * @param symbol
 	 * @param quantity
-	 * @return
 	 */
-	public boolean sellStock(String symbol, int quantity )
+	public void sellStock(String symbol, int quantity ) throws StockNotExistException, NotEnoughStocksToSellException
 	{
 
 		for(int i=0; i<stockStatus.length; i++)
@@ -161,43 +174,50 @@ public class Portfolio {
 					stockStatus[i].setStockQuantity(0);
 				}
 				else if(stockStatus[i].getStockQuantity()-quantity < 0){
-						System.out.println("Not enough stocks to sell");
+						throw new NotEnoughStocksToSellException();
 				}
 				else if (stockStatus[i].getStockQuantity()-quantity >= 0){
 					stockStatus[i].setStockQuantity(stockStatus[i].getStockQuantity()-quantity);
 					float amount = quantity*stockStatus[i].getBid();
 					updateBalance(amount);
 				}
-				return true;
+				else 
+					throw new StockNotExistException(symbol);
+				
 			}
-		return false;
+		
 	}
 
 	/**
 	 * buy stocks and update the balance
 	 * @param symbol
 	 * @param quantity
-	 * @return
 	 */
-	public boolean buyStock(String symbol, int quantity )
+	public void buyStock(String symbol, int quantity ) throws StockNotExistException,BalanceException
 	{
 
 		for(int i=0; i<stockStatus.length;i++)
 			if(symbol.equals(stockStatus[i].getSymbol()))
 			{
-				if( quantity == -1) {
-					stockStatus[i].setStockQuantity(stockStatus[i].getStockQuantity()+ (int)(balance/stockStatus[i].getAsk()));
+				if( quantity == -1)
+					{
+					
 					float spent = ((int)(balance/stockStatus[i].getAsk()) *stockStatus[i].getAsk())/(-1); //how much bought
+					if (spent/(-1) > balance )
+						throw new BalanceException();
+					stockStatus[i].setStockQuantity(stockStatus[i].getStockQuantity()+ (int)(balance/stockStatus[i].getAsk()));
 					updateBalance(spent);
 				}
-				else{
-					stockStatus[i].setStockQuantity(stockStatus[i].getStockQuantity()+quantity);
+				else
+				{
 					float spent1=(quantity*stockStatus[i].getAsk())/(-1);
+					if (spent1/(-1) > balance )
+						throw new BalanceException();
+					stockStatus[i].setStockQuantity(stockStatus[i].getStockQuantity()+quantity);
 					updateBalance(spent1);
 				}
-				return true;
 			}
-		return false;
+		throw new StockNotExistException(symbol);	
 	}
 	/**
 	 * method 

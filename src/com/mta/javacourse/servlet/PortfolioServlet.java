@@ -22,14 +22,17 @@ public class PortfolioServlet  extends HttpServlet {
 		resp.setContentType("text/html");
 		
 		PortfolioService portfolioService = new PortfolioService();
-		Portfolio portfolio = portfolioService.getPortfolio();
-		Stock[] stocks = portfolio.getStockStatus();
+		Portfolio portfolio;
 		
-		
-		//print protfolio
-		String portfolioStr=portfolio.getHtmlString();
-		resp.getWriter().println(portfolioStr);
-		
-			
+		try
+		{
+			portfolio =portfolioService.getPortfolio();
+			String portfolioStr= portfolio.getHtmlString();
+			resp.getWriter().println(portfolioStr);
+		}
+		catch (Exception e)
+		{
+			resp.getWriter().println(e.getMessage());
+		}
 	}
 }

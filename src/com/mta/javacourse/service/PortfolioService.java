@@ -3,6 +3,7 @@ package com.mta.javacourse.service;
 import java.util.Calendar;
 import java.util.Date;
 
+import com.mta.javacourse.exception.NotEnoughStocksToSellException;
 import com.mta.javacourse.model.Portfolio;
 import com.mta.javacourse.model.Stock;
 
@@ -17,11 +18,12 @@ public class PortfolioService {
 /**
  * this method create a new portfolio 
  * @return
+ * 
  */
-	public Portfolio getPortfolio()
+	public Portfolio getPortfolio() throws Exception
 	{
 		 Portfolio myPortfolio= new Portfolio();
-         myPortfolio.setTitle("Exercise 7 portfolio");
+         myPortfolio.setTitle("<b>Exercise 9 portfolio</b>");
          myPortfolio.setBalance(10000);
         
 
@@ -38,7 +40,7 @@ public class PortfolioService {
 		myPortfolio.addStock(s1);
 		myPortfolio.addStock(s2);
 		myPortfolio.addStock(s3);
-		
+		myPortfolio.addStock(s3);
 		
 		myPortfolio.buyStock("PIH",20);
 		myPortfolio.buyStock("AAL",30);
