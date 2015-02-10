@@ -1,13 +1,13 @@
 package com.mta.javacourse.model;
 
 
-import java.util.Date;
+import java.util.List;
 
 import com.mta.javacourse.exception.BalanceException;
-import com.mta.javacourse.exception.NotEnoughStocksToSellException;
+import com.mta.javacourse.exception.IllegalQuantityException;
 import com.mta.javacourse.exception.PortfolioFullException;
 import com.mta.javacourse.exception.StockAlreadyExistsException;
-import com.mta.javacourse.exception.StockNotExistException;
+import com.mta.javacourse.exception.StockNotExistsException;
 
 /**
  * class represent Portfolio
@@ -17,7 +17,7 @@ import com.mta.javacourse.exception.StockNotExistException;
  */
 public class Portfolio {
 
-	private final static int MAX_PORTFOLIO_SIZE=5;
+	public static final int SIZE=5;
 	public enum ALGO_RECOMMENDATION {DO_NOTHING,BUY,SELL};
 	private int portfolioSize;
 	private String title;
@@ -34,7 +34,7 @@ public class Portfolio {
 		balance=0;
 		portfolioSize=0;
 		this.setTitle("portfolio");
-		stockStatus=new StockStatus[MAX_PORTFOLIO_SIZE];
+		stockStatus=new StockStatus[SIZE];
 		
 	}
 
@@ -58,6 +58,19 @@ public class Portfolio {
 
 	}
 
+	/**
+	 * constructor that sets a list to array
+	 * @param stockStatuses
+	 */
+	public Portfolio (List<StockStatus> stockStatuses)
+	{
+		this();
+	
+		for (int i=0;i<stockStatus.length;i++)
+		{
+			this.stockStatus[i]=stockStatuses.get(i);
+		}
+	}
 	//setters
 
 	public void setPortfolioSize(int portfolioSize)
@@ -137,7 +150,7 @@ public class Portfolio {
 	 * removes stock from portfolio array
 	 * @param symbol
 	 */
-	public void removeStock(String symbol) throws StockNotExistException,NotEnoughStocksToSellException
+	public void removeStock(String symbol) throws StockNotExistsException,IllegalQuantityException
 	{
 		sellStock(symbol,-1);
 		for (int i=0;i<stockStatus.length;i++)
@@ -150,7 +163,7 @@ public class Portfolio {
 				
 			}
 			else 
-				throw new StockNotExistException(symbol);
+				throw new StockNotExistsException(symbol);
 
 		}
 		
@@ -162,7 +175,7 @@ public class Portfolio {
 	 * @param symbol
 	 * @param quantity
 	 */
-	public void sellStock(String symbol, int quantity ) throws StockNotExistException, NotEnoughStocksToSellException
+	public void sellStock(String symbol, int quantity ) throws StockNotExistsException, IllegalQuantityException
 	{
 
 		for(int i=0; i<stockStatus.length; i++)
@@ -174,7 +187,7 @@ public class Portfolio {
 					stockStatus[i].setStockQuantity(0);
 				}
 				else if(stockStatus[i].getStockQuantity()-quantity < 0){
-						throw new NotEnoughStocksToSellException();
+						throw new IllegalQuantityException();
 				}
 				else if (stockStatus[i].getStockQuantity()-quantity >= 0){
 					stockStatus[i].setStockQuantity(stockStatus[i].getStockQuantity()-quantity);
@@ -182,7 +195,7 @@ public class Portfolio {
 					updateBalance(amount);
 				}
 				else 
-					throw new StockNotExistException(symbol);
+					throw new StockNotExistsException(symbol);
 				
 			}
 		
@@ -193,7 +206,7 @@ public class Portfolio {
 	 * @param symbol
 	 * @param quantity
 	 */
-	public void buyStock(String symbol, int quantity ) throws StockNotExistException,BalanceException
+	public void buyStock(String symbol, int quantity ) throws StockNotExistsException,BalanceException
 	{
 
 		for(int i=0; i<stockStatus.length;i++)
@@ -217,7 +230,7 @@ public class Portfolio {
 					updateBalance(spent1);
 				}
 			}
-		throw new StockNotExistException(symbol);	
+		throw new StockNotExistsException(symbol);	
 	}
 	/**
 	 * method 
@@ -258,6 +271,25 @@ public class Portfolio {
 	{
 		return getBalance()+getStocksValue();
 	}
+	
+	/**
+	 * 
+	 * @param symbol
+	 * @return 
+	 * @throws StockNotExistsException
+	 */
+	
+	public StockStatus findBySymbol(String symbol) throws StockNotExistsException
+	{
+		for (int i=0;i< stockStatus.length;i++)
+		{
+			if (symbol.equals(stockStatus[i].getSymbol()))
+				return stockStatus[i];
+		}
+		throw new StockNotExistsException(symbol);
+	}
+	
+	
 	
 }
 

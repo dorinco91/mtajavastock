@@ -1,14 +1,15 @@
 package com.mta.javacourse.exception;
 
-/**
- * negative balance exception 
- * @author dorin
- *
- */
 public class BalanceException extends Exception {
+
+	private static final long serialVersionUID = 1L;
 	
-	public BalanceException()
-	{
-		super("you don't have enough money");
+	public BalanceException() {
+		super("Out of balance!");
 	}
+	
+	public BalanceException(String message) {
+		super(message);
+	}
+
 }

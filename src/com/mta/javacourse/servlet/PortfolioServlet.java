@@ -1,38 +1,38 @@
 package com.mta.javacourse.servlet;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
-import javax.servlet.http.HttpServlet;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.mta.javacourse.service.PortfolioService;
-import com.mta.javacourse.model.Portfolio;
-import com.mta.javacourse.model.Stock;
+import com.mta.javacourse.dto.PortfolioDto;
+import com.mta.javacourse.dto.PortfolioTotalStatus;
+import com.mta.javacourse.model.StockStatus;
 
-/**
- * PortfolioServlet print to screen portfolio data 
- * @author dorin cohen
- * date December 2014
- */
-public class PortfolioServlet  extends HttpServlet {
-	public void doGet(HttpServletRequest req, HttpServletResponse resp)
-			throws IOException {
+public class PortfolioServlet extends AbstractAlgoServlet {
+
+	private static final long serialVersionUID = 1L;
+
+	@Override
+	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		
-		resp.setContentType("text/html");
+		resp.setContentType("application/json");
 		
-		PortfolioService portfolioService = new PortfolioService();
-		Portfolio portfolio;
-		
-		try
-		{
-			portfolio =portfolioService.getPortfolio();
-			String portfolioStr= portfolio.getHtmlString();
-			resp.getWriter().println(portfolioStr);
+		PortfolioTotalStatus[] totalStatus = portfolioService.getPortfolioTotalStatus();
+		StockStatus[] stockStatusArray = portfolioService.getPortfolio().getStockStatus();
+		List<StockStatus> stockStatusList = new ArrayList<>();
+		for (StockStatus ss : stockStatusArray) {
+			if(ss != null)
+				stockStatusList.add(ss);
 		}
-		catch (Exception e)
-		{
-			resp.getWriter().println(e.getMessage());
-		}
+		
+		PortfolioDto pDto = new PortfolioDto();
+		pDto.setTitle(portfolioService.getPortfolio().getTitle());
+		pDto.setTotalStatus(totalStatus);
+		pDto.setStockTable(stockStatusList);
+		resp.getWriter().print(withNullObjects().toJson(pDto));
 	}
 }
